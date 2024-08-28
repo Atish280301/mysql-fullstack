@@ -1,17 +1,11 @@
 //backend/controller/product.js
-import mysql from "mysql";
-
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "crudproject",
-});
-
 export const getProducts = (req, res) => {
   const sql = "SELECT * FROM product";
-  db.query(sql, (error, data) => {
-    if (error) return res.json("Error");
+  req.db.query(sql, (error, data) => {
+    if (error) {
+      console.error("Query Error: ", error);
+      return res.status(500).json({ message: "Error fetching data" });
+    }
     return res.json(data);
   });
 };
@@ -23,29 +17,29 @@ export const addProducts = (req, res) => {
     req.body.price, req.body.quantity,
     req.body.production, req.body.expiry
   ];
-  db.query(sql, [values],(error, data)=>{
-    if(error){
-      console.log("Create Error : ",error);
+  req.db.query(sql, [values], (error, data) => {
+    if (error) {
+      console.error("Insert Error: ", error);
       return res.status(500).json({ message: "Error inserting data" });
     }
     return res.json(data);
-  })
-}
+  });
+};
 
 export const deleteProducts = (req, res) => {
   const id = req.params.id;
   const sql = "DELETE FROM product WHERE ID = ?";
-  db.query(sql, [id], (err, data)=>{
+  req.db.query(sql, [id], (err, data) => {
     if (err) {
       console.error("Delete Error: ", err);
       return res.status(500).json({ message: "Error deleting data" });
     }
     if (data.affectedRows === 0) {
-      return res.status(404).json({ message: "Student not found" });
+      return res.status(404).json({ message: "Product not found" });
     }
     return res.json({ message: "Delete successful" });
-  })
-}
+  });
+};
 
 export const patchProducts = (req, res) => {
   const id = req.params.id;
@@ -88,7 +82,7 @@ export const patchProducts = (req, res) => {
   sql += updates.join(", ") + " WHERE id = ?";
   values.push(id);
 
-  db.query(sql, values, (err, data) => {
+  req.db.query(sql, values, (err, data) => {
     if (err) {
       console.error("Update Error: ", err);
       return res.status(500).json({ message: "Error updating data" });
