@@ -22,9 +22,10 @@ export const addProducts = (req, res) => {
       console.error("Insert Error: ", error);
       return res.status(500).json({ message: "Error inserting data" });
     }
-    return res.json(data);
+    return res.status(201).json({ message: "Product added successfully", data });
   });
 };
+
 
 export const deleteProducts = (req, res) => {
   const id = req.params.id;
